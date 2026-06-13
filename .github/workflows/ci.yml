@@ -10,14 +10,26 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout sun
+        uses: actions/checkout@v4
+        with:
+          path: sun
+
+      - name: Checkout solar-commons
+        uses: actions/checkout@v4
+        with:
+          repository: ayoub3bidi/solar-commons
+          path: solar-commons
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-go@v5
         with:
-          go-version-file: go.mod
+          go-version-file: sun/go.mod
 
       - name: Check
         run: go vet ./...
+        working-directory: sun
 
       - name: Test
         run: go test ./...
+        working-directory: sun
