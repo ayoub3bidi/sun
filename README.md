@@ -4,15 +4,12 @@
     <img src="./assets/sun.png" width="160" alt="Sun CLI">
   </picture>
   <h3 align="center">Sun CLI</h3>
-  <p align="center">Scaffold production-ready backends and documentation sites — from a single binary.</p>
+  <p align="center">Generate production-ready backends and documentation sites — from a single binary.</p>
 </p>
 
 <p align="center">
   <a href="https://github.com/ayoub3bidi/sun/releases">
     <img src="https://img.shields.io/github/v/release/ayoub3bidi/sun?style=flat&label=Release">
-  </a>
-  <a href="https://github.com/ayoub3bidi/sun/actions">
-    <img src="https://img.shields.io/github/actions/workflow/status/ayoub3bidi/sun/.github/workflows/ci.yml?branch=main&style=flat&label=CI">
   </a>
   <img src="https://img.shields.io/badge/Go-1.25.3-00ADD8?style=flat&logo=go">
   <a href="./LICENSE">
@@ -25,11 +22,17 @@
 ## Quick start
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/main/install.sh | sh
-sun create
+git clone https://github.com/ayoub3bidi/sun
+git clone https://github.com/ayoub3bidi/solar-commons
+
+cd sun
+go build -o sun .
+./sun create
 ```
 
 No Node.js, Python, or Docker required. Just a single binary.
+
+> Pre-built binaries and a `curl | sh` installer are planned for the v1.0 release.
 
 ---
 
@@ -162,20 +165,7 @@ my-api/
 ### Prerequisites
 
 - Go 1.25.3+
-- A local checkout of `solar-commons` as a sibling directory
-
-### Setup
-
-```bash
-git clone https://github.com/ayoub3bidi/sun
-git clone https://github.com/ayoub3bidi/solar-commons
-
-cd sun
-go build -o sun .
-./sun create
-```
-
-The `go.mod` uses a `replace` directive to point to the local `solar-commons` checkout during development.
+- A sibling checkout of `solar-commons` at `../solar-commons` (the `go.mod` `replace` directive expects this)
 
 ### Testing
 
