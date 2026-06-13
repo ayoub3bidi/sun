@@ -14,9 +14,7 @@
   <a href="https://github.com/ayoub3bidi/sun/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/ayoub3bidi/sun/.github/workflows/ci.yml?branch=main&style=flat&label=CI">
   </a>
-  <a href="https://pkg.go.dev/github.com/ayoub3bidi/sun">
-    <img src="https://img.shields.io/badge/Go-1.25.3-00ADD8?style=flat&logo=go">
-  </a>
+  <img src="https://img.shields.io/badge/Go-1.25.3-00ADD8?style=flat&logo=go">
   <a href="./LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-green?style=flat">
   </a>
@@ -212,7 +210,7 @@ sun/
 - **v0.4** — `sun upgrade` for template updates, `sun cache clear`
 - **v1.0** — GoReleaser, `install.sh`, `brew install`, stable API
 
-See the [full plan](./PLAN.md) for details.
+See the [architecture plan](https://github.com/ayoub3bidi/solar) for details.
 
 ## Contributing
 
