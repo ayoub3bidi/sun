@@ -4,7 +4,7 @@
     <img src="./assets/sun.png" width="160" alt="Sun CLI">
   </picture>
   <h3 align="center">Sun CLI</h3>
-  <p align="center">Ship production-ready backends and docs — in one command.</p>
+  <p align="center">Ship production-ready backends and docs with one command.</p>
 </p>
 
 <p align="center">
@@ -28,9 +28,6 @@
 - [Commands](#commands)
 - [Output structure](#output-structure)
 - [Development](#development)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
