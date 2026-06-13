@@ -4,7 +4,7 @@
     <img src="./assets/sun.png" width="160" alt="Sun CLI">
   </picture>
   <h3 align="center">Sun CLI</h3>
-  <p align="center">Generate production-ready backends and documentation sites — from a single binary.</p>
+  <p align="center">Ship production-ready backends and docs — in one command.</p>
 </p>
 
 <p align="center">
@@ -16,6 +16,21 @@
     <img src="https://img.shields.io/badge/license-MIT-green?style=flat">
   </a>
 </p>
+
+---
+
+## Table of Contents
+
+- [Quick start](#quick-start)
+- [Features](#features)
+- [How it works](#how-it-works)
+- [Templates](#templates)
+- [Commands](#commands)
+- [Output structure](#output-structure)
+- [Development](#development)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
@@ -192,20 +207,3 @@ sun/
 │   └── ISSUE_TEMPLATE/
 └── assets/
 ```
-
-## Roadmap
-
-- **v0.2** — Mercury and Venus manifests, non-interactive flags (`--ci`), `sun doctor`
-- **v0.3** — Cache directory (`~/.sun/cache/`), offline mode, template registry JSON
-- **v0.4** — `sun upgrade` for template updates, `sun cache clear`
-- **v1.0** — GoReleaser, `install.sh`, `brew install`, stable API
-
-See the [architecture plan](https://github.com/ayoub3bidi/solar) for details.
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development workflow and guidelines.
-
-## License
-
-[MIT](./LICENSE) — Copyright (c) 2026 Ayoub Bidi
