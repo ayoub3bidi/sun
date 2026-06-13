@@ -1,6 +1,6 @@
-# sun
+# Sun CLI
 
-**Solar CLI** — scaffold production-ready project templates from a single binary.
+Scaffold production-ready project templates from a single binary.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/main/install.sh | sh
@@ -102,11 +102,3 @@ The `go.mod` uses a `replace` directive to point to the local `solar-commons` ch
 go vet ./...
 go test ./...
 ```
-
-## Distribution
-
-Once stable, `sun` will be distributed via GoReleaser and a `curl | sh` installer. For now, build from source.
-
-## License
-
-MIT
