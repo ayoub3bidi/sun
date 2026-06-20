@@ -3,7 +3,7 @@ module github.com/ayoub3bidi/sun
 go 1.25.3
 
 require (
-	github.com/ayoub3bidi/solar-commons v0.1.0
+	github.com/ayoub3bidi/solar-commons v0.2.0
 	github.com/charmbracelet/bubbles v0.20.0
 	github.com/charmbracelet/bubbletea v1.3.4
 	github.com/charmbracelet/lipgloss v1.1.0
@@ -55,4 +55,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/ayoub3bidi/solar-commons => ../solar-commons
+
