@@ -1,0 +1,34 @@
+version: 2
+project_name: sun
+builds:
+  - id: sun
+    main: .
+    binary: sun
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/ayoub3bidi/sun/cmd.version={{.Version}}
+archives:
+  - id: sun
+    formats:
+      - tar.gz
+    files:
+      - scripts/run.sh
+      - scripts/install.sh
+      - scripts/lib/*
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
+release:
+  github:
+    owner: ayoub3bidi
+    name: sun
+  name_template: "{{.Tag}}"
+changelog:
+  sort: asc

@@ -33,6 +33,25 @@
 
 ## Quick start
 
+**Primary — scaffold once, nothing installed (like npx):**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/v1.0.0/scripts/run.sh | sh
+```
+
+**Optional — install `sun` for repeat use:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/v1.0.0/scripts/install.sh | sh
+sun create
+```
+
+No Node.js, Python, or Go required on your machine for the commands above.
+
+See [docs/SOLAR_STACK.md](./docs/SOLAR_STACK.md) for the full ecosystem map.
+
+### Development
+
 ```bash
 git clone https://github.com/ayoub3bidi/sun
 git clone https://github.com/ayoub3bidi/solar-commons
@@ -42,9 +61,7 @@ go build -o sun .
 ./sun create
 ```
 
-No Node.js, Python, or Docker required. Just a single binary.
-
-> Pre-built binaries and a `curl | sh` installer are planned for the v1.0 release.
+Requires Go 1.25.3+ and a sibling `../solar-commons` checkout (`replace` in `go.mod`).
 
 ---
 
@@ -93,10 +110,10 @@ The CLI stays thin. All scaffold logic lives in [`solar-commons`](https://github
 | TUI label | Template | Stack | Manifest |
 |---|---|---|---|
 | API + Alembic (recommended) | **Mars** | FastAPI, Alembic, PostgreSQL, Redis, JWT auth | ✅ `v0.1.3` |
-| API + Flyway | **Mercury** | FastAPI, Flyway, PostgreSQL, Redis, JWT auth | ❌ Coming soon |
-| Docs site | **Venus** | Docusaurus 3, Tailwind CSS, i18n | ❌ Coming soon |
+| API + Flyway | **Mercury** | FastAPI, Flyway, PostgreSQL, Redis, JWT auth | ✅ `v0.4.0` |
+| Docs site | **Venus** | Docusaurus 3, Tailwind CSS, i18n, search | ✅ `v1.1.1` |
 
-Mars is the only template currently wired in the TUI. Mercury and Venus will be added once their manifests are ready.
+All three templates are wired in the TUI. Pin bumps happen in `registry/registry.go` when template tags move forward.
 
 ### Template lifecycle
 
@@ -122,7 +139,7 @@ This means templates evolve independently. A new Mars release only requires bump
 ```
 Step 1 — Project type
 ├── API project (Alembic recommended, or Flyway)
-└── Docs project            ← not yet wired
+└── Docs project
 
 Step 2a — If API
 │   ├── Project name, API version prefix, app title
@@ -195,7 +212,12 @@ sun/
 │   ├── root.go            # Cobra root — sun, sun version
 │   └── create.go          # sun create — launches TUI
 ├── registry/
-│   └── registry.go        # Template registry (mars currently)
+│   └── registry.go        # Template registry (mars, mercury, venus)
+├── scripts/
+│   ├── run.sh             # Ephemeral npx-style runner (primary)
+│   └── install.sh         # Optional persistent install
+├── e2e/
+│   └── scaffold_test.go   # Integration tests
 ├── internal/tui/
 │   ├── model.go           # Bubble Tea model, steps, scaffold orchestration
 │   └── styles.go          # Lipgloss styling

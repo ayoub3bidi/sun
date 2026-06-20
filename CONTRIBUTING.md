@@ -2,7 +2,7 @@
 
 Thanks for helping improve `sun`.
 
-`sun` is the Solar CLI — a Bubble Tea TUI that scaffolds project templates using `solar-commons`. This repository covers the user-facing CLI experience: prompts, template registry, flags, install scripts, and release automation.
+`sun` is the Solar CLI — a Bubble Tea TUI that scaffolds project templates using `solar-commons`. See [docs/SOLAR_STACK.md](./docs/SOLAR_STACK.md) for how this repo fits the ecosystem.
 
 ## Local Setup
 
