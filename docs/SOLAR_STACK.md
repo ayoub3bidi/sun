@@ -1,6 +1,6 @@
 # Solar Stack
 
-This repository is part of the **[Solar Stack](https://github.com/ayoub3bidi/sun)** — one-command project scaffolding with the `sun` CLI.
+The **Solar Stack** is a set of templates and tooling for one-command project scaffolding with the [`sun`](https://github.com/ayoub3bidi/sun) CLI.
 
 | Repository | Role |
 |------------|------|
