@@ -47,10 +47,15 @@ sun_version() {
   printf '%s' "v1.0.0"
 }
 
+sun_version_raw() {
+  version=$(sun_version)
+  printf '%s' "${version#v}"
+}
+
 sun_asset_name() {
   os=$1
   arch=$2
-  printf 'sun_%s_%s_%s.tar.gz' "$(sun_version)" "$os" "$arch"
+  printf 'sun_%s_%s_%s.tar.gz' "$(sun_version_raw)" "$os" "$arch"
 }
 
 sun_download_url() {

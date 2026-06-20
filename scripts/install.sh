@@ -4,6 +4,7 @@ set -e
 
 SUN_REPO="${SUN_REPO:-ayoub3bidi/sun}"
 SUN_VERSION="${SUN_VERSION:-v1.0.0}"
+SUN_VERSION_RAW="${SUN_VERSION#v}"
 
 sun_cache_dir() {
   if [ -n "${XDG_CACHE_HOME:-}" ]; then
@@ -43,7 +44,7 @@ sun_install_to_cache() {
   fi
 
   mkdir -p "$install_dir"
-  asset="sun_${SUN_VERSION}_${os}_${arch}.tar.gz"
+  asset="sun_${SUN_VERSION_RAW}_${os}_${arch}.tar.gz"
   url="https://github.com/${SUN_REPO}/releases/download/${SUN_VERSION}/${asset}"
 
   tmp=$(mktemp -d)
@@ -61,8 +62,8 @@ sun_install_to_cache() {
   tar -xzf "${tmp}/sun.tar.gz" -C "$tmp"
   if [ -f "${tmp}/sun" ]; then
     mv "${tmp}/sun" "$bin_path"
-  elif [ -f "${tmp}/sun_${SUN_VERSION}_${os}_${arch}/sun" ]; then
-    mv "${tmp}/sun_${SUN_VERSION}_${os}_${arch}/sun" "$bin_path"
+  elif [ -f "${tmp}/sun_${SUN_VERSION_RAW}_${os}_${arch}/sun" ]; then
+    mv "${tmp}/sun_${SUN_VERSION_RAW}_${os}_${arch}/sun" "$bin_path"
   else
     echo "sun binary not found in release archive" >&2
     exit 1

@@ -41,8 +41,8 @@ sun_install_to_cache() {
   tar -xzf "${tmp}/sun.tar.gz" -C "$tmp"
   if [ -f "${tmp}/sun" ]; then
     mv "${tmp}/sun" "$bin_path"
-  elif [ -f "${tmp}/sun_${version}_${os}_${arch}/sun" ]; then
-    mv "${tmp}/sun_${version}_${os}_${arch}/sun" "$bin_path"
+  elif [ -f "${tmp}/sun_${version#v}_${os}_${arch}/sun" ]; then
+    mv "${tmp}/sun_${version#v}_${os}_${arch}/sun" "$bin_path"
   else
     echo "could not find sun binary in release archive" >&2
     exit 1
