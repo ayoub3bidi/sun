@@ -12,9 +12,6 @@
     <img src="https://img.shields.io/github/v/release/ayoub3bidi/sun?style=flat&label=Release">
   </a>
   <img src="https://img.shields.io/badge/Go-1.25.3-00ADD8?style=flat&logo=go">
-  <a href="./LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-green?style=flat">
-  </a>
 </p>
 
 ---
@@ -78,15 +75,15 @@ Requires Go 1.25.3+ and a sibling `../solar-commons` checkout (`replace` in `go.
 
 ```
 ┌─────────────┐     ┌──────────────────────────────────────────────────┐
-│  sun create  │ ──→ │  Bubble Tea TUI: name, version, title, OIDC…    │
+│  sun create │ ──→ │  Bubble Tea TUI: name, version, title, OIDC…     │
 └─────────────┘     └──────────────┬───────────────────────────────────┘
                                    ↓
                             ScaffoldConfig
                                    ↓
 ┌──────────────────────────────────────────────────────────────────────┐
-│  solar-commons (Go library)                                           │
+│  solar-commons (Go library)                                          │
 │                                                                      │
-│  1. Shallow clone template @ pinned ref (v0.1.3, v1.1.1, …)         │
+│  1. Shallow clone template @ pinned ref (v0.1.3, v1.1.1, …)          │
 │  2. Strip .git history                                               │
 │  3. Parse solar.manifest.yaml                                        │
 │  4. Apply variable rewrites (project name, title, version)           │
