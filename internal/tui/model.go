@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ayoub3bidi/sun/registry"
 	sc "github.com/ayoub3bidi/solar-commons"
-	tea "github.com/charmbracelet/bubbletea"
+	"github.com/ayoub3bidi/sun/registry"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type step int
@@ -42,25 +42,27 @@ type scaffoldResultMsg struct {
 }
 
 type model struct {
-	step           step
-	projectKind    projectKind
-	useAlembic     bool
-	templateID     string
-	projectName    textinput.Model
-	apiVersion     textinput.Model
-	appTitle       textinput.Model
-	includeOIDC    bool
-	oidcChosen     bool
-	includeI18n    bool
-	i18nChosen     bool
-	includeSearch  bool
-	searchChosen   bool
-	validationErr  string
-	spinner        spinner.Model
-	err            error
-	result         *sc.ScaffoldResult
-	width          int
-	height         int
+	step            step
+	projectKind     projectKind
+	useAlembic      bool
+	templateID      string
+	projectCursor   int
+	migrationCursor int
+	projectName     textinput.Model
+	apiVersion      textinput.Model
+	appTitle        textinput.Model
+	includeOIDC     bool
+	oidcChosen      bool
+	includeI18n     bool
+	i18nChosen      bool
+	includeSearch   bool
+	searchChosen    bool
+	validationErr   string
+	spinner         spinner.Model
+	err             error
+	result          *sc.ScaffoldResult
+	width           int
+	height          int
 }
 
 func NewScaffoldModel() model {
@@ -114,6 +116,10 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		inputWidth := m.inputWidth()
+		m.projectName.Width = inputWidth
+		m.apiVersion.Width = inputWidth
+		m.appTitle.Width = inputWidth
 		return m, nil
 
 	case tea.KeyMsg:
@@ -170,39 +176,34 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	var b strings.Builder
-	m.validationErr = ""
+	title, subtitle, body, footer := m.viewParts()
+	if m.validationErr != "" {
+		body += "\n\n" + errorStyle.Render(m.validationErr)
+	}
+	return m.renderFrame(title, subtitle, body, footer)
+}
 
+func (m model) viewParts() (string, string, string, string) {
 	switch m.step {
 	case stepProjectType:
-		b.WriteString(titleStyle.Render("New Solar Project"))
-		b.WriteString("\n\n")
-		b.WriteString("What are you building?\n\n")
-		b.WriteString(subtleStyle.Render("Press 'a' for API, 'd' for Docs"))
+		return "New Solar Project",
+			"Choose the kind of Solar template to scaffold.",
+			renderChoiceCards(projectTypeOptions(), m.projectCursor),
+			"↑/↓ Move • Enter Select • A API • D Docs • ESC Quit"
 
 	case stepMigrationChoice:
-		b.WriteString(titleStyle.Render("Database Migrations"))
-		b.WriteString("\n\n")
-		b.WriteString("Which migration style?\n\n")
-		b.WriteString(subtleStyle.Render("'a' Alembic (recommended)  ·  'f' Flyway (classic SQL)"))
+		return "Database Migrations",
+			"Pick the migration workflow for the generated FastAPI backend.",
+			renderChoiceCards(migrationOptions(), m.migrationCursor),
+			"↑/↓ Move • Enter Select • A Alembic • F Flyway • ESC Quit"
 
 	case stepProjectName:
-		b.WriteString(titleStyle.Render("Project Name"))
-		b.WriteString("\n\n")
-		b.WriteString(labelStyle.Render("Project name:"))
-		b.WriteString("\n")
-		b.WriteString(m.projectName.View())
-		b.WriteString("\n\n")
-		b.WriteString(subtleStyle.Render("Kebab-case, e.g. my-api or my-docs"))
+		body := formField("Project name", m.projectName.View(), "Kebab-case only, for example my-api or my-docs.")
+		return "Project Name", "This becomes the output directory and project identifier.", body, "Enter Continue • ESC Quit"
 
 	case stepAPIVersion:
-		b.WriteString(titleStyle.Render("API Version Prefix"))
-		b.WriteString("\n\n")
-		b.WriteString(labelStyle.Render("API version prefix:"))
-		b.WriteString("\n")
-		b.WriteString(m.apiVersion.View())
-		b.WriteString("\n\n")
-		b.WriteString(subtleStyle.Render("e.g. v1, v2, v2026-01"))
+		body := formField("API version prefix", m.apiVersion.View(), "Examples: v1, v2, v2026-01.")
+		return "API Version Prefix", "Used by the generated API routing and docs.", body, "Enter Continue • ESC Quit"
 
 	case stepAppTitle:
 		title := "Application Title"
@@ -211,119 +212,282 @@ func (m model) View() string {
 			title = "Site Title"
 			hint = "Shown in the navbar and browser tab"
 		}
-		b.WriteString(titleStyle.Render(title))
-		b.WriteString("\n\n")
-		b.WriteString(labelStyle.Render("Title:"))
-		b.WriteString("\n")
-		b.WriteString(m.appTitle.View())
-		b.WriteString("\n\n")
-		b.WriteString(subtleStyle.Render(hint))
+		body := formField("Title", m.appTitle.View(), hint+". Leave as generated or edit it.")
+		return title, "Give the generated project a human-readable name.", body, "Enter Continue • ESC Quit"
 
 	case stepOIDC:
-		b.WriteString(titleStyle.Render("OIDC Authentication"))
-		b.WriteString("\n\n")
-		b.WriteString("Include Google OIDC?")
-		b.WriteString("\n\n")
-		b.WriteString(boolChoice(m.includeOIDC, m.oidcChosen))
-		b.WriteString("\n\n")
-		b.WriteString(subtleStyle.Render("Press 'y' for Yes, 'n' for No, then Enter"))
+		body := renderBooleanChoice("Include Google OIDC?", "Adds Google OIDC routes and configuration to the generated API.", m.includeOIDC)
+		return "OIDC Authentication", "Choose whether this API starts with Google OIDC support.", body, "←/→ Move • Y/N Choose • Enter Continue • ESC Quit"
 
 	case stepI18n:
-		b.WriteString(titleStyle.Render("Internationalization"))
-		b.WriteString("\n\n")
-		b.WriteString("Include French (i18n)?")
-		b.WriteString("\n\n")
-		b.WriteString(boolChoice(m.includeI18n, m.i18nChosen))
-		b.WriteString("\n\n")
-		b.WriteString(subtleStyle.Render("Press 'y' for Yes, 'n' for No, then Enter"))
+		body := renderBooleanChoice("Include French i18n?", "Keeps the French locale and i18n project structure in the docs site.", m.includeI18n)
+		return "Internationalization", "Choose whether the docs scaffold should include localization.", body, "←/→ Move • Y/N Choose • Enter Continue • ESC Quit"
 
 	case stepSearch:
-		b.WriteString(titleStyle.Render("Local Search"))
-		b.WriteString("\n\n")
-		b.WriteString("Include offline search plugin?")
-		b.WriteString("\n\n")
-		b.WriteString(boolChoice(m.includeSearch, m.searchChosen))
-		b.WriteString("\n\n")
-		b.WriteString(subtleStyle.Render("Press 'y' for Yes, 'n' for No, then Enter"))
+		body := renderBooleanChoice("Include offline search?", "Keeps the local search plugin in the generated docs site.", m.includeSearch)
+		return "Local Search", "Choose whether readers should get built-in local search.", body, "←/→ Move • Y/N Choose • Enter Continue • ESC Quit"
 
 	case stepConfirm:
 		tmpl, ok := m.selectedTemplate()
 		if !ok {
-			b.WriteString(errorStyle.Render("Template not found"))
-			break
+			return "Confirm Scaffold", "The selected template could not be resolved.", errorStyle.Render("Template not found"), "N Back • ESC Quit"
 		}
 		title := m.appTitle.Value()
 		if title == "" {
 			title = deriveTitle(m.projectName.Value())
 		}
-		b.WriteString(titleStyle.Render("Confirm Scaffold"))
-		b.WriteString("\n\n")
-		b.WriteString(fmt.Sprintf("  Project name:  %s\n", m.projectName.Value()))
-		if m.projectKind == kindAPI {
-			b.WriteString(fmt.Sprintf("  API version:   %s\n", m.apiVersion.Value()))
-			b.WriteString(fmt.Sprintf("  App title:     %s\n", title))
-			b.WriteString(fmt.Sprintf("  OIDC:          %v\n", m.includeOIDC))
-		} else {
-			b.WriteString(fmt.Sprintf("  Site title:    %s\n", title))
-			b.WriteString(fmt.Sprintf("  i18n:          %v\n", m.includeI18n))
-			b.WriteString(fmt.Sprintf("  Search:        %v\n", m.includeSearch))
-		}
-		b.WriteString(fmt.Sprintf("  Template:      %s\n", tmpl.Label))
-		b.WriteString("\n")
-		b.WriteString(subtleStyle.Render("Press 'y' to scaffold, 'n' to go back"))
+		return "Confirm Scaffold", "Review the scaffold plan before creating files.", m.renderConfirm(tmpl, title), "Y Scaffold • N Restart • ESC Quit"
 
 	case stepScaffolding:
-		b.WriteString(m.spinner.View())
-		b.WriteString(" Scaffolding your project...")
+		tmpl, _ := m.selectedTemplate()
+		body := fmt.Sprintf("%s Applying %s into %s\n\n%s",
+			m.spinner.View(),
+			selectedStyle.Render(tmpl.Label),
+			codeStyle.Render(filepath.Join(".", m.projectName.Value())),
+			subtleStyle.Render("Cloning template, applying manifest rewrites, pruning disabled features, and creating the initial commit."))
+		return "Scaffolding", "Your project is being assembled.", body, "Please wait • CTRL+C Quit"
 
 	case stepDone:
 		if m.err != nil {
-			b.WriteString(errorStyle.Render("Scaffold failed"))
-			b.WriteString("\n\n")
-			b.WriteString(m.err.Error())
-			b.WriteString("\n\n")
-			b.WriteString(subtleStyle.Render("Press Enter or 'q' to exit"))
-		} else {
-			b.WriteString(successStyle.Render("Project scaffolded!"))
-			b.WriteString("\n\n")
-			b.WriteString(fmt.Sprintf("  Location:  %s\n", m.result.Destination))
-			b.WriteString(fmt.Sprintf("  Template:  %s\n", m.result.TemplateID))
-			b.WriteString(fmt.Sprintf("  Commit:    %s\n", m.result.InitialCommit))
-			if len(m.result.PrunedFeatures) > 0 {
-				b.WriteString(fmt.Sprintf("  Pruned:    %s\n", strings.Join(m.result.PrunedFeatures, ", ")))
-			}
-			b.WriteString("\n\n")
-			b.WriteString(subtleStyle.Render("Next steps:"))
-			b.WriteString("\n")
-			b.WriteString(fmt.Sprintf("  cd %s\n", m.projectName.Value()))
-			if m.projectKind == kindAPI {
-				b.WriteString("  cp .env.dist .env\n")
-				b.WriteString("  docker compose up")
-			} else {
-				b.WriteString("  pnpm install\n")
-				b.WriteString("  pnpm start")
-			}
-			b.WriteString("\n\n")
-			b.WriteString(subtleStyle.Render("Press Enter or 'q' to exit"))
+			body := errorStyle.Render("Scaffold failed") + "\n\n" + m.err.Error()
+			return "Scaffold Failed", "No successful scaffold result was produced.", body, "Enter Exit • Q Exit"
 		}
+		return "Project Scaffolded", "The Solar template is ready to use.", m.renderSuccess(), "Enter Exit • Q Exit"
 	}
 
-	if m.validationErr != "" {
-		b.WriteString("\n\n")
-		b.WriteString(errorStyle.Render(m.validationErr))
-	}
-
-	return docStyle.Render(b.String())
+	return "Sun", "Solar project scaffolding.", "", "ESC Quit"
 }
 
-func boolChoice(yes, chosen bool) string {
-	if yes {
-		return "[✓] Yes"
+func (m model) renderConfirm(tmpl registry.Template, title string) string {
+	var b strings.Builder
+	b.WriteString(sectionTitle("Project"))
+	b.WriteString(fmt.Sprintf("  Name:       %s\n", selectedStyle.Render(m.projectName.Value())))
+	if m.projectKind == kindAPI {
+		b.WriteString(fmt.Sprintf("  API:        %s\n", m.apiVersion.Value()))
+		b.WriteString(fmt.Sprintf("  Title:      %s\n", title))
+	} else {
+		b.WriteString(fmt.Sprintf("  Site title: %s\n", title))
 	}
-	if chosen {
-		return "[✓] No"
+	b.WriteString("\n")
+	b.WriteString(sectionTitle("Template"))
+	b.WriteString(fmt.Sprintf("  Label:      %s\n", tmpl.Label))
+	b.WriteString(fmt.Sprintf("  Ref:        %s\n", tmpl.DefaultRef))
+	b.WriteString(fmt.Sprintf("  Repo:       %s\n", tmpl.Repo))
+	b.WriteString("\n")
+	b.WriteString(sectionTitle("Features"))
+	if m.projectKind == kindAPI {
+		b.WriteString(fmt.Sprintf("  Google OIDC: %s\n", statusText(m.includeOIDC)))
+	} else {
+		b.WriteString(fmt.Sprintf("  French i18n: %s\n", statusText(m.includeI18n)))
+		b.WriteString(fmt.Sprintf("  Search:      %s\n", statusText(m.includeSearch)))
 	}
-	return "[ ]"
+	b.WriteString("\n")
+	b.WriteString(selectedStyle.Render("Press y to create the project."))
+	return b.String()
+}
+
+func (m model) renderSuccess() string {
+	var b strings.Builder
+	b.WriteString(successStyle.Render("Project scaffolded successfully."))
+	b.WriteString("\n\n")
+	b.WriteString(sectionTitle("Result"))
+	b.WriteString(fmt.Sprintf("  Location: %s\n", codeStyle.Render(m.result.Destination)))
+	b.WriteString(fmt.Sprintf("  Template: %s\n", m.result.TemplateID))
+	b.WriteString(fmt.Sprintf("  Commit:   %s\n", m.result.InitialCommit))
+	if len(m.result.PrunedFeatures) > 0 {
+		b.WriteString(fmt.Sprintf("  Pruned:   %s\n", strings.Join(m.result.PrunedFeatures, ", ")))
+	}
+	b.WriteString("\n")
+	b.WriteString(sectionTitle("Next commands"))
+	b.WriteString(commandBlock(m.nextCommands()))
+	return b.String()
+}
+
+func (m model) nextCommands() []string {
+	commands := []string{fmt.Sprintf("cd %s", m.projectName.Value())}
+	if m.projectKind == kindAPI {
+		return append(commands, "cp .env.dist .env", "docker compose up")
+	}
+	return append(commands, "pnpm install", "pnpm start")
+}
+
+func (m model) renderFrame(title, subtitle, body, footer string) string {
+	width := m.contentWidth()
+	header := brandStyle.Render("SUN") + subtleStyle.Render("  Solar Stack Project Forge")
+	if current, total := m.stepProgress(); current > 0 && total > 0 {
+		header += subtleStyle.Render(fmt.Sprintf("  |  Step %d of %d", current, total))
+	} else if current > 0 {
+		header += subtleStyle.Render(fmt.Sprintf("  |  Step %d", current))
+	}
+
+	content := titleStyle.Render(title)
+	if subtitle != "" {
+		content += "\n" + subtleStyle.Render(subtitle)
+	}
+	if body != "" {
+		content += "\n\n" + body
+	}
+
+	frame := panelStyle.Width(width).Render(content)
+	if m.step == stepProjectType || m.step == stepMigrationChoice || m.step == stepConfirm {
+		frame = activePanelStyle.Width(width).Render(content)
+	}
+
+	if footer != "" {
+		footer = "\n" + subtleStyle.Render(footer)
+	}
+	return docStyle.Render(header + "\n\n" + frame + footer)
+}
+
+func (m model) contentWidth() int {
+	if m.width <= 0 {
+		return 72
+	}
+	width := m.width - 6
+	if width > 86 {
+		width = 86
+	}
+	if width < 32 {
+		width = 32
+	}
+	return width
+}
+
+func (m model) inputWidth() int {
+	width := m.contentWidth() - 8
+	if width > 40 {
+		width = 40
+	}
+	if width < 20 {
+		width = 20
+	}
+	return width
+}
+
+func (m model) stepProgress() (int, int) {
+	switch m.step {
+	case stepProjectType:
+		return 1, 0
+	case stepMigrationChoice:
+		return 2, 7
+	case stepProjectName:
+		if m.projectKind == kindDocs {
+			return 2, 6
+		}
+		return 3, 7
+	case stepAPIVersion:
+		return 4, 7
+	case stepAppTitle:
+		if m.projectKind == kindAPI {
+			return 5, 7
+		}
+		return 3, 6
+	case stepOIDC:
+		return 6, 7
+	case stepI18n:
+		return 4, 6
+	case stepSearch:
+		return 5, 6
+	case stepConfirm:
+		if m.projectKind == kindAPI {
+			return 7, 7
+		}
+		return 6, 6
+	}
+	return 0, 0
+}
+
+type choiceOption struct {
+	Key         string
+	Title       string
+	Description string
+	Meta        string
+}
+
+func projectTypeOptions() []choiceOption {
+	return []choiceOption{
+		{Key: "a", Title: "API backend", Description: "FastAPI service with PostgreSQL, Redis, JWT auth, and migrations.", Meta: "Mars or Mercury"},
+		{Key: "d", Title: "Docs site", Description: "Docusaurus documentation site with Tailwind CSS and optional i18n/search.", Meta: "Venus"},
+	}
+}
+
+func migrationOptions() []choiceOption {
+	return []choiceOption{
+		{Key: "a", Title: "Alembic", Description: "Recommended Python migration workflow for most API projects.", Meta: "Mars"},
+		{Key: "f", Title: "Flyway", Description: "Classic SQL migration workflow for teams that prefer SQL-first changes.", Meta: "Mercury"},
+	}
+}
+
+func renderChoiceCards(options []choiceOption, cursor int) string {
+	var b strings.Builder
+	for i, option := range options {
+		if i > 0 {
+			b.WriteString("\n\n")
+		}
+		prefix := "  "
+		style := optionStyle
+		if i == cursor {
+			prefix = selectedStyle.Render("> ")
+			style = activeOptionStyle
+		}
+		content := fmt.Sprintf("%s%s %s\n%s%s",
+			prefix,
+			labelStyle.Render(option.Title),
+			keyStyle.Render("("+option.Key+")"),
+			"  ",
+			subtleStyle.Render(option.Description))
+		if option.Meta != "" {
+			content += "\n  " + selectedStyle.Render(option.Meta)
+		}
+		b.WriteString(style.Render(content))
+	}
+	return b.String()
+}
+
+func renderBooleanChoice(question, description string, yes bool) string {
+	var b strings.Builder
+	b.WriteString(labelStyle.Render(question))
+	b.WriteString("\n")
+	b.WriteString(subtleStyle.Render(description))
+	b.WriteString("\n\n")
+	b.WriteString(booleanPill("Yes", yes))
+	b.WriteString("  ")
+	b.WriteString(booleanPill("No", !yes))
+	return b.String()
+}
+
+func booleanPill(label string, active bool) string {
+	style := optionStyle.Copy().Padding(0, 2)
+	prefix := "  "
+	if active {
+		style = activeOptionStyle.Copy().Padding(0, 2)
+		prefix = "> "
+	}
+	return style.Render(prefix + label)
+}
+
+func formField(label, input, hint string) string {
+	return labelStyle.Render(label) + "\n" + input + "\n\n" + subtleStyle.Render(hint)
+}
+
+func sectionTitle(title string) string {
+	return selectedStyle.Render(title) + "\n"
+}
+
+func statusText(enabled bool) string {
+	if enabled {
+		return successStyle.Render("included")
+	}
+	return subtleStyle.Render("pruned")
+}
+
+func commandBlock(commands []string) string {
+	var b strings.Builder
+	for _, command := range commands {
+		b.WriteString(codeStyle.Render(command))
+		b.WriteString("\n")
+	}
+	return b.String()
 }
 
 func (m *model) selectedTemplate() (registry.Template, bool) {
@@ -335,10 +499,30 @@ func (m *model) selectedTemplate() (registry.Template, bool) {
 
 func (m model) updateProjectType(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
+	case "up", "left", "k", "h":
+		m.projectCursor = 0
+	case "down", "right", "j", "l":
+		m.projectCursor = 1
 	case "a", "A":
+		m.projectCursor = 0
 		m.projectKind = kindAPI
 		m.step = stepMigrationChoice
 	case "d", "D":
+		m.projectCursor = 1
+		m.projectKind = kindDocs
+		m.templateID = "venus"
+		m.includeI18n = true
+		m.i18nChosen = true
+		m.includeSearch = true
+		m.searchChosen = true
+		m.step = stepProjectName
+		m.projectName.Focus()
+	case "enter":
+		if m.projectCursor == 0 {
+			m.projectKind = kindAPI
+			m.step = stepMigrationChoice
+			return m, nil
+		}
 		m.projectKind = kindDocs
 		m.templateID = "venus"
 		m.includeI18n = true
@@ -353,14 +537,29 @@ func (m model) updateProjectType(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 func (m model) updateMigrationChoice(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
+	case "up", "left", "k", "h":
+		m.migrationCursor = 0
+	case "down", "right", "j", "l":
+		m.migrationCursor = 1
 	case "a", "A":
+		m.migrationCursor = 0
 		m.useAlembic = true
 		m.templateID = "mars"
 		m.step = stepProjectName
 		m.projectName.Focus()
 	case "f", "F":
+		m.migrationCursor = 1
 		m.useAlembic = false
 		m.templateID = "mercury"
+		m.step = stepProjectName
+		m.projectName.Focus()
+	case "enter":
+		m.useAlembic = m.migrationCursor == 0
+		if m.useAlembic {
+			m.templateID = "mars"
+		} else {
+			m.templateID = "mercury"
+		}
 		m.step = stepProjectName
 		m.projectName.Focus()
 	}
@@ -370,6 +569,10 @@ func (m model) updateMigrationChoice(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 func (m model) updateProjectName(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	m.projectName, cmd = m.projectName.Update(msg)
+	if msg.String() != "enter" {
+		m.validationErr = ""
+		return m, cmd
+	}
 	if msg.String() == "enter" {
 		name := strings.TrimSpace(m.projectName.Value())
 		if err := validateProjectName(name); err != nil {
@@ -422,6 +625,12 @@ func (m model) updateAppTitle(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 
 func (m model) updateOIDC(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
+	case "left", "up", "h", "k":
+		m.includeOIDC = true
+		m.oidcChosen = true
+	case "right", "down", "l", "j":
+		m.includeOIDC = false
+		m.oidcChosen = true
 	case "y", "Y":
 		m.includeOIDC = true
 		m.oidcChosen = true
@@ -429,15 +638,20 @@ func (m model) updateOIDC(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.includeOIDC = false
 		m.oidcChosen = true
 	case "enter":
-		if m.oidcChosen {
-			m.step = stepConfirm
-		}
+		m.oidcChosen = true
+		m.step = stepConfirm
 	}
 	return m, nil
 }
 
 func (m model) updateI18n(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
+	case "left", "up", "h", "k":
+		m.includeI18n = true
+		m.i18nChosen = true
+	case "right", "down", "l", "j":
+		m.includeI18n = false
+		m.i18nChosen = true
 	case "y", "Y":
 		m.includeI18n = true
 		m.i18nChosen = true
@@ -445,15 +659,20 @@ func (m model) updateI18n(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.includeI18n = false
 		m.i18nChosen = true
 	case "enter":
-		if m.i18nChosen {
-			m.step = stepSearch
-		}
+		m.i18nChosen = true
+		m.step = stepSearch
 	}
 	return m, nil
 }
 
 func (m model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
+	case "left", "up", "h", "k":
+		m.includeSearch = true
+		m.searchChosen = true
+	case "right", "down", "l", "j":
+		m.includeSearch = false
+		m.searchChosen = true
 	case "y", "Y":
 		m.includeSearch = true
 		m.searchChosen = true
@@ -461,9 +680,8 @@ func (m model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.includeSearch = false
 		m.searchChosen = true
 	case "enter":
-		if m.searchChosen {
-			m.step = stepConfirm
-		}
+		m.searchChosen = true
+		m.step = stepConfirm
 	}
 	return m, nil
 }
