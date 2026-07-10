@@ -261,25 +261,25 @@ func (m model) viewParts() (string, string, string, string) {
 func (m model) renderConfirm(tmpl registry.Template, title string) string {
 	var b strings.Builder
 	b.WriteString(sectionTitle("Project"))
-	b.WriteString(fmt.Sprintf("  Name:       %s\n", selectedStyle.Render(m.projectName.Value())))
+	fmt.Fprintf(&b, "  Name:       %s\n", selectedStyle.Render(m.projectName.Value()))
 	if m.projectKind == kindAPI {
-		b.WriteString(fmt.Sprintf("  API:        %s\n", m.apiVersion.Value()))
-		b.WriteString(fmt.Sprintf("  Title:      %s\n", title))
+		fmt.Fprintf(&b, "  API:        %s\n", m.apiVersion.Value())
+		fmt.Fprintf(&b, "  Title:      %s\n", title)
 	} else {
-		b.WriteString(fmt.Sprintf("  Site title: %s\n", title))
+		fmt.Fprintf(&b, "  Site title: %s\n", title)
 	}
 	b.WriteString("\n")
 	b.WriteString(sectionTitle("Template"))
-	b.WriteString(fmt.Sprintf("  Label:      %s\n", tmpl.Label))
-	b.WriteString(fmt.Sprintf("  Ref:        %s\n", tmpl.DefaultRef))
-	b.WriteString(fmt.Sprintf("  Repo:       %s\n", tmpl.Repo))
+	fmt.Fprintf(&b, "  Label:      %s\n", tmpl.Label)
+	fmt.Fprintf(&b, "  Ref:        %s\n", tmpl.DefaultRef)
+	fmt.Fprintf(&b, "  Repo:       %s\n", tmpl.Repo)
 	b.WriteString("\n")
 	b.WriteString(sectionTitle("Features"))
 	if m.projectKind == kindAPI {
-		b.WriteString(fmt.Sprintf("  Google OIDC: %s\n", statusText(m.includeOIDC)))
+		fmt.Fprintf(&b, "  Google OIDC: %s\n", statusText(m.includeOIDC))
 	} else {
-		b.WriteString(fmt.Sprintf("  French i18n: %s\n", statusText(m.includeI18n)))
-		b.WriteString(fmt.Sprintf("  Search:      %s\n", statusText(m.includeSearch)))
+		fmt.Fprintf(&b, "  French i18n: %s\n", statusText(m.includeI18n))
+		fmt.Fprintf(&b, "  Search:      %s\n", statusText(m.includeSearch))
 	}
 	b.WriteString("\n")
 	b.WriteString(selectedStyle.Render("Press y to create the project."))
@@ -291,11 +291,11 @@ func (m model) renderSuccess() string {
 	b.WriteString(successStyle.Render("Project scaffolded successfully."))
 	b.WriteString("\n\n")
 	b.WriteString(sectionTitle("Result"))
-	b.WriteString(fmt.Sprintf("  Location: %s\n", codeStyle.Render(m.result.Destination)))
-	b.WriteString(fmt.Sprintf("  Template: %s\n", m.result.TemplateID))
-	b.WriteString(fmt.Sprintf("  Commit:   %s\n", m.result.InitialCommit))
+	fmt.Fprintf(&b, "  Location: %s\n", codeStyle.Render(m.result.Destination))
+	fmt.Fprintf(&b, "  Template: %s\n", m.result.TemplateID)
+	fmt.Fprintf(&b, "  Commit:   %s\n", m.result.InitialCommit)
 	if len(m.result.PrunedFeatures) > 0 {
-		b.WriteString(fmt.Sprintf("  Pruned:   %s\n", strings.Join(m.result.PrunedFeatures, ", ")))
+		fmt.Fprintf(&b, "  Pruned:   %s\n", strings.Join(m.result.PrunedFeatures, ", "))
 	}
 	b.WriteString("\n")
 	b.WriteString(sectionTitle("Next commands"))
@@ -457,10 +457,10 @@ func renderBooleanChoice(question, description string, yes bool) string {
 }
 
 func booleanPill(label string, active bool) string {
-	style := optionStyle.Copy().Padding(0, 2)
+	style := optionStyle.Padding(0, 2)
 	prefix := "  "
 	if active {
-		style = activeOptionStyle.Copy().Padding(0, 2)
+		style = activeOptionStyle.Padding(0, 2)
 		prefix = "> "
 	}
 	return style.Render(prefix + label)
@@ -498,6 +498,16 @@ func (m *model) selectedTemplate() (registry.Template, bool) {
 }
 
 func (m model) updateProjectType(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	selectDocs := func() {
+		m.projectKind = kindDocs
+		m.templateID = "venus"
+		m.includeI18n = true
+		m.i18nChosen = true
+		m.includeSearch = true
+		m.searchChosen = true
+		m.step = stepProjectName
+		m.projectName.Focus()
+	}
 	switch msg.String() {
 	case "up", "left", "k", "h":
 		m.projectCursor = 0
@@ -509,28 +519,14 @@ func (m model) updateProjectType(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.step = stepMigrationChoice
 	case "d", "D":
 		m.projectCursor = 1
-		m.projectKind = kindDocs
-		m.templateID = "venus"
-		m.includeI18n = true
-		m.i18nChosen = true
-		m.includeSearch = true
-		m.searchChosen = true
-		m.step = stepProjectName
-		m.projectName.Focus()
+		selectDocs()
 	case "enter":
 		if m.projectCursor == 0 {
 			m.projectKind = kindAPI
 			m.step = stepMigrationChoice
 			return m, nil
 		}
-		m.projectKind = kindDocs
-		m.templateID = "venus"
-		m.includeI18n = true
-		m.i18nChosen = true
-		m.includeSearch = true
-		m.searchChosen = true
-		m.step = stepProjectName
-		m.projectName.Focus()
+		selectDocs()
 	}
 	return m, nil
 }
@@ -623,67 +619,37 @@ func (m model) updateAppTitle(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) updateOIDC(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+func (m model) updateBooleanStep(msg tea.KeyMsg, include *bool, chosen *bool, next step) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "left", "up", "h", "k":
-		m.includeOIDC = true
-		m.oidcChosen = true
+		*include = true
+		*chosen = true
 	case "right", "down", "l", "j":
-		m.includeOIDC = false
-		m.oidcChosen = true
+		*include = false
+		*chosen = true
 	case "y", "Y":
-		m.includeOIDC = true
-		m.oidcChosen = true
+		*include = true
+		*chosen = true
 	case "n", "N":
-		m.includeOIDC = false
-		m.oidcChosen = true
+		*include = false
+		*chosen = true
 	case "enter":
-		m.oidcChosen = true
-		m.step = stepConfirm
+		*chosen = true
+		m.step = next
 	}
 	return m, nil
+}
+
+func (m model) updateOIDC(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	return m.updateBooleanStep(msg, &m.includeOIDC, &m.oidcChosen, stepConfirm)
 }
 
 func (m model) updateI18n(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
-	case "left", "up", "h", "k":
-		m.includeI18n = true
-		m.i18nChosen = true
-	case "right", "down", "l", "j":
-		m.includeI18n = false
-		m.i18nChosen = true
-	case "y", "Y":
-		m.includeI18n = true
-		m.i18nChosen = true
-	case "n", "N":
-		m.includeI18n = false
-		m.i18nChosen = true
-	case "enter":
-		m.i18nChosen = true
-		m.step = stepSearch
-	}
-	return m, nil
+	return m.updateBooleanStep(msg, &m.includeI18n, &m.i18nChosen, stepSearch)
 }
 
 func (m model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
-	case "left", "up", "h", "k":
-		m.includeSearch = true
-		m.searchChosen = true
-	case "right", "down", "l", "j":
-		m.includeSearch = false
-		m.searchChosen = true
-	case "y", "Y":
-		m.includeSearch = true
-		m.searchChosen = true
-	case "n", "N":
-		m.includeSearch = false
-		m.searchChosen = true
-	case "enter":
-		m.searchChosen = true
-		m.step = stepConfirm
-	}
-	return m, nil
+	return m.updateBooleanStep(msg, &m.includeSearch, &m.searchChosen, stepConfirm)
 }
 
 func (m model) updateConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {

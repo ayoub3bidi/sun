@@ -44,13 +44,13 @@ var (
 			BorderForeground(panelSoft).
 			Padding(1, 2)
 
-	activePanelStyle = panelStyle.Copy().
+	activePanelStyle = panelStyle.
 				BorderForeground(sunGold)
 
 	optionStyle = lipgloss.NewStyle().
 			Padding(0, 1)
 
-	activeOptionStyle = optionStyle.Copy().
+	activeOptionStyle = optionStyle.
 				Border(lipgloss.ThickBorder(), false, false, false, true).
 				BorderForeground(sunGold)
 
