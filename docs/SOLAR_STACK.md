@@ -2,6 +2,10 @@
 
 The **Solar Stack** is a set of templates and tooling for one-command project scaffolding with the [`sun`](https://github.com/ayoub3bidi/sun) CLI.
 
+<p align="center">
+  <img src="../assets/solarstack.excalidraw.png" alt="Solar Stack">
+</p>
+
 | Repository | Role |
 |------------|------|
 | [sun](https://github.com/ayoub3bidi/sun) | CLI — interactive scaffold (primary entry point) |
