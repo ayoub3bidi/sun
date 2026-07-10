@@ -47,6 +47,10 @@ No Node.js, Python, or Go required on your machine for the commands above.
 
 See [docs/SOLAR_STACK.md](./docs/SOLAR_STACK.md) for the full ecosystem map.
 
+<p align="center">
+  <img src="./assets/screenshot.png" alt="Sun CLI Screenshot">
+</p>
+
 ### Development
 
 ```bash

@@ -2,6 +2,8 @@ package tui
 
 import (
 	"testing"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 func TestValidateProjectName(t *testing.T) {
@@ -30,5 +32,58 @@ func TestValidateProjectName(t *testing.T) {
 func TestDeriveTitle(t *testing.T) {
 	if got := deriveTitle("my-api"); got != "My Api" {
 		t.Fatalf("got %q", got)
+	}
+}
+
+func TestProjectTypeArrowEnterSelectsDocs(t *testing.T) {
+	m := NewScaffoldModel()
+
+	updated, _ := m.updateProjectType(tea.KeyMsg{Type: tea.KeyDown})
+	m = updated.(model)
+	if m.projectCursor != 1 {
+		t.Fatalf("projectCursor=%d, want 1", m.projectCursor)
+	}
+
+	updated, _ = m.updateProjectType(tea.KeyMsg{Type: tea.KeyEnter})
+	m = updated.(model)
+	if m.step != stepProjectName {
+		t.Fatalf("step=%v, want stepProjectName", m.step)
+	}
+	if m.projectKind != kindDocs || m.templateID != "venus" {
+		t.Fatalf("selected kind/template = %v/%q, want docs/venus", m.projectKind, m.templateID)
+	}
+	if !m.includeI18n || !m.includeSearch {
+		t.Fatal("docs defaults should include i18n and search")
+	}
+}
+
+func TestMigrationArrowEnterSelectsFlyway(t *testing.T) {
+	m := NewScaffoldModel()
+
+	updated, _ := m.updateMigrationChoice(tea.KeyMsg{Type: tea.KeyDown})
+	m = updated.(model)
+	updated, _ = m.updateMigrationChoice(tea.KeyMsg{Type: tea.KeyEnter})
+	m = updated.(model)
+
+	if m.step != stepProjectName {
+		t.Fatalf("step=%v, want stepProjectName", m.step)
+	}
+	if m.useAlembic || m.templateID != "mercury" {
+		t.Fatalf("selected migration = alembic:%v template:%q, want flyway/mercury", m.useAlembic, m.templateID)
+	}
+}
+
+func TestOIDCEnterAcceptsDefaultNo(t *testing.T) {
+	m := NewScaffoldModel()
+	m.step = stepOIDC
+
+	updated, _ := m.updateOIDC(tea.KeyMsg{Type: tea.KeyEnter})
+	m = updated.(model)
+
+	if m.step != stepConfirm {
+		t.Fatalf("step=%v, want stepConfirm", m.step)
+	}
+	if m.includeOIDC {
+		t.Fatal("OIDC should default to false")
 	}
 }
