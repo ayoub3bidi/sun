@@ -619,37 +619,50 @@ func (m model) updateAppTitle(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m model) updateBooleanStep(msg tea.KeyMsg, include *bool, chosen *bool, next step) (tea.Model, tea.Cmd) {
+func parseBooleanChoice(msg tea.KeyMsg, current bool) (value, chosen bool, advance step) {
 	switch msg.String() {
 	case "left", "up", "h", "k":
-		*include = true
-		*chosen = true
+		return true, true, 0
 	case "right", "down", "l", "j":
-		*include = false
-		*chosen = true
+		return false, true, 0
 	case "y", "Y":
-		*include = true
-		*chosen = true
+		return true, true, 0
 	case "n", "N":
-		*include = false
-		*chosen = true
+		return false, true, 0
 	case "enter":
-		*chosen = true
-		m.step = next
+		return current, true, -1
+	}
+	return current, false, 0
+}
+
+func (m model) updateOIDC(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	val, chosen, adv := parseBooleanChoice(msg, m.includeOIDC)
+	m.includeOIDC = val
+	m.oidcChosen = m.oidcChosen || chosen
+	if adv == -1 {
+		m.step = stepConfirm
 	}
 	return m, nil
 }
 
-func (m model) updateOIDC(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	return m.updateBooleanStep(msg, &m.includeOIDC, &m.oidcChosen, stepConfirm)
-}
-
 func (m model) updateI18n(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	return m.updateBooleanStep(msg, &m.includeI18n, &m.i18nChosen, stepSearch)
+	val, chosen, adv := parseBooleanChoice(msg, m.includeI18n)
+	m.includeI18n = val
+	m.i18nChosen = m.i18nChosen || chosen
+	if adv == -1 {
+		m.step = stepSearch
+	}
+	return m, nil
 }
 
 func (m model) updateSearch(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	return m.updateBooleanStep(msg, &m.includeSearch, &m.searchChosen, stepConfirm)
+	val, chosen, adv := parseBooleanChoice(msg, m.includeSearch)
+	m.includeSearch = val
+	m.searchChosen = m.searchChosen || chosen
+	if adv == -1 {
+		m.step = stepConfirm
+	}
+	return m, nil
 }
 
 func (m model) updateConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
