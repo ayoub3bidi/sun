@@ -6,20 +6,12 @@ Thanks for helping improve `sun`.
 
 ## Local Setup
 
+See [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) for full setup and testing instructions.
+
 ```bash
 git clone https://github.com/ayoub3bidi/sun
-git clone https://github.com/ayoub3bidi/solar-commons
-# sibling directories: ./sun/  ./solar-commons/
-
 cd sun
 go build -o sun .
-```
-
-Use the Go version declared in `go.mod`.
-
-```bash
-go test ./...
-go vet ./...
 ```
 
 ## Contribution Rules

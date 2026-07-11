@@ -115,9 +115,9 @@ The CLI stays thin. All scaffold logic lives in [`solar-commons`](https://github
 
 | TUI label | Template | Stack | Manifest |
 |---|---|---|---|
-| API + Alembic (recommended) | **Mars** | FastAPI, Alembic, PostgreSQL, Redis, JWT auth | ✅ `v0.1.3` |
-| API + Flyway | **Mercury** | FastAPI, Flyway, PostgreSQL, Redis, JWT auth | ✅ `v0.4.0` |
-| Docs site | **Venus** | Docusaurus 3, Tailwind CSS, i18n, search | ✅ `v1.1.1` |
+| API + Alembic (recommended) | **Mars** | FastAPI, Alembic, PostgreSQL, Redis, JWT auth | ✅ `v0.1.4` |
+| API + Flyway | **Mercury** | FastAPI, Flyway, PostgreSQL, Redis, JWT auth | ✅ `v0.4.1` |
+| Docs site | **Venus** | Docusaurus 3, Tailwind CSS, i18n, search | ✅ `v1.1.2` |
 
 All three templates are wired in the TUI. Pin bumps happen in `registry/registry.go` when template tags move forward.
 
@@ -223,40 +223,6 @@ my-api/
 └── README.md
 ```
 
-## Development
+## Contributing
 
-### Prerequisites
-
-- Go 1.25.12+
-- A sibling checkout of `solar-commons` at `../solar-commons` (the `go.mod` `replace` directive expects this)
-
-### Testing
-
-```bash
-go vet ./...
-go test ./...
-```
-
-### Project layout
-
-```
-sun/
-├── main.go                # Entry point
-├── cmd/
-│   ├── root.go            # Cobra root — sun, sun version
-│   └── create.go          # sun create — launches TUI
-├── registry/
-│   └── registry.go        # Template registry (mars, mercury, venus)
-├── scripts/
-│   ├── run.sh             # Ephemeral npx-style runner (primary)
-│   └── install.sh         # Optional persistent install
-├── e2e/
-│   └── scaffold_test.go   # Integration tests
-├── internal/tui/
-│   ├── model.go           # Bubble Tea model, steps, scaffold orchestration
-│   └── styles.go          # Lipgloss styling
-├── .github/
-│   ├── workflows/ci.yml
-│   └── ISSUE_TEMPLATE/
-└── assets/
-```
+See [DEVELOPMENT.md](./docs/DEVELOPMENT.md) for setup and testing, and [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for the code layout.

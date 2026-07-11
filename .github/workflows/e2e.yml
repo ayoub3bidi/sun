@@ -14,21 +14,9 @@ jobs:
       - name: Checkout sun
         uses: actions/checkout@v4
 
-      - name: Checkout solar-commons
-        uses: actions/checkout@v4
-        with:
-          repository: ayoub3bidi/solar-commons
-          path: solar-commons
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-
-      - name: Link solar-commons for go.mod replace
-        run: |
-          mkdir -p "$(dirname "$GITHUB_WORKSPACE")"
-          ln -sfn "$GITHUB_WORKSPACE/solar-commons" "$(dirname "$GITHUB_WORKSPACE")/solar-commons"
 
       - name: Unit tests
         run: |
@@ -37,6 +25,12 @@ jobs:
 
       - name: Integration tests (Mars)
         run: go test -tags integration -timeout 180s ./e2e/...
+
+      - name: Checkout solar-commons
+        uses: actions/checkout@v4
+        with:
+          repository: ayoub3bidi/solar-commons
+          path: solar-commons
 
       - name: solar-commons Mars integration
         working-directory: solar-commons

@@ -85,7 +85,6 @@ The integration test scaffolds from the pinned registry ref and may fail because
 
 ## Known Drift To Watch
 
-- The README development section and CI workflow text may reference a sibling `solar-commons` checkout even though the current module file uses the published module with no local `replace`.
 - `scripts/lib/download.sh` includes checksum support, but the top-level `run.sh` and `install.sh` currently inline download logic without sourcing that helper.
 - Template refs in `registry/registry.go` can move ahead of examples in docs. Check the registry first when updating release notes, docs, or tests.
 

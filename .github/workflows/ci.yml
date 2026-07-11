@@ -10,26 +10,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout sun
+      - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Checkout solar-commons
-        uses: actions/checkout@v4
-        with:
-          repository: ayoub3bidi/solar-commons
-          path: solar-commons
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
 
-      - name: Link solar-commons for go.mod replace
-        run: |
-          mkdir -p "$(dirname "$GITHUB_WORKSPACE")"
-          ln -sfn "$GITHUB_WORKSPACE/solar-commons" "$(dirname "$GITHUB_WORKSPACE")/solar-commons"
-
-      - name: Check
+      - name: Vet
         run: go vet ./...
 
       - name: Test
