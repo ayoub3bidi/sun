@@ -33,17 +33,24 @@
 **Primary — scaffold once, nothing installed (like npx):**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/v1.0.0/scripts/run.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/main/scripts/run.sh | sh
 ```
 
 **Optional — install `sun` for repeat use:**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/v1.0.0/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/main/scripts/install.sh | sh
 sun create
 ```
 
-No Node.js, Python, or Go required on your machine for the commands above.
+**Already have Go installed? One-liner:**
+
+```bash
+go install github.com/ayoub3bidi/sun@latest
+sun create
+```
+
+No Node.js, Python, or Go required on your machine for the first two commands above.
 
 See [docs/SOLAR_STACK.md](./docs/SOLAR_STACK.md) for the full ecosystem map.
 

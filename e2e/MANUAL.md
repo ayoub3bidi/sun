@@ -15,5 +15,5 @@ Run on a **fresh Linux** and **fresh macOS** VM (no Go, no prior `sun` install).
 Pin version when testing a release candidate:
 
 ```bash
-SUN_VERSION=v1.0.0 curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/v1.0.0/scripts/run.sh | sh
+SUN_VERSION=v1.0.0 curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/main/scripts/run.sh | sh
 ```

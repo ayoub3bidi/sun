@@ -38,13 +38,22 @@ sun_repo() {
   printf '%s' "${SUN_REPO:-ayoub3bidi/sun}"
 }
 
+sun_latest_version() {
+  latest=$(curl -fsSL https://api.github.com/repos/ayoub3bidi/sun/releases/latest 2>/dev/null \
+    | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p')
+  if [ -n "$latest" ]; then
+    printf '%s' "$latest"
+  else
+    printf '%s' "v1.0.0"
+  fi
+}
+
 sun_version() {
   if [ -n "${SUN_VERSION:-}" ]; then
     printf '%s' "$SUN_VERSION"
-    return
+  else
+    sun_latest_version
   fi
-  # Default: latest release tag (override with SUN_VERSION=v1.0.0 for pinning)
-  printf '%s' "v1.0.0"
 }
 
 sun_version_raw() {

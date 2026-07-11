@@ -2,35 +2,10 @@
 # Ephemeral sun runner — like npx: cache binary, run create, nothing added to PATH.
 set -e
 
-SUN_REPO="${SUN_REPO:-ayoub3bidi/sun}"
-SUN_VERSION="${SUN_VERSION:-v1.0.0}"
+. "$(dirname "$0")/lib/platform.sh"
+
+SUN_VERSION="${SUN_VERSION:-$(sun_latest_version)}"
 SUN_VERSION_RAW="${SUN_VERSION#v}"
-
-sun_cache_dir() {
-  if [ -n "${XDG_CACHE_HOME:-}" ]; then
-    printf '%s/sun' "$XDG_CACHE_HOME"
-  else
-    printf '%s/.cache/sun' "${HOME}"
-  fi
-}
-
-sun_detect_os() {
-  os=$(uname -s | tr '[:upper:]' '[:lower:]')
-  case "$os" in
-    linux) printf 'linux' ;;
-    darwin) printf 'darwin' ;;
-    *) echo "unsupported OS: $os" >&2; exit 1 ;;
-  esac
-}
-
-sun_detect_arch() {
-  arch=$(uname -m)
-  case "$arch" in
-    x86_64|amd64) printf 'amd64' ;;
-    arm64|aarch64) printf 'arm64' ;;
-    *) echo "unsupported arch: $arch" >&2; exit 1 ;;
-  esac
-}
 
 sun_install_to_cache() {
   os=$(sun_detect_os)
@@ -44,8 +19,7 @@ sun_install_to_cache() {
   fi
 
   mkdir -p "$install_dir"
-  asset="sun_${SUN_VERSION_RAW}_${os}_${arch}.tar.gz"
-  url="https://github.com/${SUN_REPO}/releases/download/${SUN_VERSION}/${asset}"
+  url=$(sun_download_url "$os" "$arch")
 
   tmp=$(mktemp -d)
   trap 'rm -rf "$tmp"' EXIT INT HUP

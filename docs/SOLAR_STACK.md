@@ -17,12 +17,12 @@ The **Solar Stack** is a set of templates and tooling for one-command project sc
 ## Scaffold a new project (no install)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/v1.0.0/scripts/run.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/main/scripts/run.sh | sh
 ```
 
 Optional persistent install:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/v1.0.0/scripts/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/ayoub3bidi/sun/main/scripts/install.sh | sh
 sun create
 ```

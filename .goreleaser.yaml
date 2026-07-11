@@ -30,5 +30,8 @@ release:
     owner: ayoub3bidi
     name: sun
   name_template: "{{.Tag}}"
+  extra_files:
+    - glob: scripts/run.sh
+    - glob: scripts/install.sh
 changelog:
   sort: asc
