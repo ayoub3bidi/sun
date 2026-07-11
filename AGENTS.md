@@ -19,8 +19,11 @@ Do not move clone, rewrite, feature pruning, manifest parsing, or git initializa
 ## Architecture
 
 - `main.go` is only the entry point and calls `cmd.Execute()`.
-- `cmd/root.go` defines the Cobra root command and `sun version`.
+- `cmd/root.go` defines the Cobra root command, `sun version`, and registers all subcommands.
 - `cmd/create.go` defines `sun create` and launches `internal/tui`.
+- `cmd/update.go` defines `sun update` and handles self-updating via `go-selfupdate`.
+- `cmd/version_check.go` contains `checkForUpdate()` and `runVersionCheck()` for `sun version --check`.
+- `cmd/update_check.go` contains background update notification logic (opt-in via `SUN_CHECK_UPDATES=1`).
 - `internal/tui/model.go` contains the Bubble Tea model, step transitions, confirmation view, and final scaffold command.
 - `internal/tui/validate.go` contains local input validation and friendly error translation.
 - `internal/tui/styles.go` contains Lipgloss styles only.
@@ -29,7 +32,7 @@ Do not move clone, rewrite, feature pruning, manifest parsing, or git initializa
 - `scripts/install.sh` is the persistent installer.
 - `scripts/lib/` contains shared shell helper code, but note that `run.sh` and `install.sh` currently inline similar logic.
 - `e2e/scaffold_test.go` is behind the `integration` build tag and calls `solar-commons.Scaffold` using registry data.
-- `.goreleaser.yaml` builds Linux/macOS amd64/arm64 release archives and injects `cmd.version` via ldflags.
+- `.goreleaser.yaml` builds Linux/macOS amd64/arm64 release archives and injects `cmd.version`, `cmd.commit`, and `cmd.date` via ldflags.
 
 ## Local Setup
 
@@ -75,7 +78,7 @@ The integration test scaffolds from the pinned registry ref and may fail because
 
 ## Testing Notes
 
-- Unit tests currently cover registry lookup and local TUI validation helpers.
+- Unit tests currently cover registry lookup, local TUI validation helpers, version checking, and update path detection.
 - The TUI itself is not keypress-driven in tests; behavior is mostly protected by small helper tests and integration coverage of the scaffold config path.
 - `go test ./...` does not run `e2e/scaffold_test.go` because it has `//go:build integration`.
 - CI currently checks `go vet ./...` and `go test ./...`; the E2E workflow additionally runs the integration test.

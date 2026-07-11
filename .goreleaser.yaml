@@ -15,8 +15,11 @@ builds:
     ldflags:
       - -s -w
       - -X github.com/ayoub3bidi/sun/cmd.version={{.Version}}
+      - -X github.com/ayoub3bidi/sun/cmd.commit={{.Commit}}
+      - -X github.com/ayoub3bidi/sun/cmd.date={{.Date}}
 archives:
   - id: sun
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     formats:
       - tar.gz
     files:

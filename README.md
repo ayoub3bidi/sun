@@ -11,7 +11,7 @@
   <a href="https://github.com/ayoub3bidi/sun/releases">
     <img src="https://img.shields.io/github/v/release/ayoub3bidi/sun?style=flat&label=Release">
   </a>
-  <img src="https://img.shields.io/badge/Go-1.25.3-00ADD8?style=flat&logo=go">
+  <img src="https://img.shields.io/badge/Go-1.25.12-00ADD8?style=flat&logo=go">
 </p>
 
 ---
@@ -50,9 +50,7 @@ go install github.com/ayoub3bidi/sun@latest
 sun create
 ```
 
-No Node.js, Python, or Go required on your machine for the first two commands above.
-
-See [docs/SOLAR_STACK.md](./docs/SOLAR_STACK.md) for the full ecosystem map.
+No Node.js, Python, or Go required on your machine for the first two commands above. See the full [ecosystem map](./docs/SOLAR_STACK.md).
 
 <p align="center">
   <img src="./assets/screenshot.png" alt="Sun CLI Screenshot">
@@ -69,7 +67,7 @@ go build -o sun .
 ./sun create
 ```
 
-Requires Go 1.25.3+ and a sibling `../solar-commons` checkout (`replace` in `go.mod`).
+Requires Go 1.25.12+ and a sibling `../solar-commons` checkout (`replace` in `go.mod`).
 
 ---
 
@@ -139,8 +137,10 @@ This means templates evolve independently. A new Mars release only requires bump
 | Command | Description |
 |---|---|
 | `sun` | Print help and available commands |
-| `sun version` | Print the current version |
+| `sun version` | Print the current version, commit, and build date |
+| `sun version --check` | Check if a newer version is available |
 | `sun create` | Launch the interactive scaffold TUI |
+| `sun update` | Update sun to the latest release |
 
 ### `sun create` flow
 
@@ -160,6 +160,32 @@ Step 2b — If Docs
     └── Include local search? (default: yes)
     → Output: ./<name>/ (customized Venus clone)
 ```
+
+### Updating
+
+To update sun to the latest version:
+
+```bash
+sun update
+```
+
+This downloads the latest release from GitHub and replaces the current binary in-place. If sun was installed via a package manager (Homebrew, Snap, Nix), use that manager to upgrade instead.
+
+You can also check if an update is available without installing it:
+
+```bash
+sun version --check
+```
+
+#### Automatic update notifications
+
+To receive a notification when a newer version is available, set the `SUN_CHECK_UPDATES` environment variable:
+
+```bash
+export SUN_CHECK_UPDATES=1
+```
+
+This checks GitHub once per day (in the background) and prints a notice if an update is found.
 
 ### Example
 
@@ -201,7 +227,7 @@ my-api/
 
 ### Prerequisites
 
-- Go 1.25.3+
+- Go 1.25.12+
 - A sibling checkout of `solar-commons` at `../solar-commons` (the `go.mod` `replace` directive expects this)
 
 ### Testing

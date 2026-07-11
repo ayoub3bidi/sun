@@ -30,6 +30,7 @@ go vet ./...
 - Use the template registry (`registry/`) to map user-facing labels to template IDs.
 - Preserve the `ScaffoldConfig` → `solar-commons.Scaffold` pipeline as the single code path.
 - New templates are added to the registry, not to the TUI's step logic.
+- `sun update` uses `github.com/creativeprojects/go-selfupdate` for in-place binary updates. Do not add alternative update mechanisms.
 
 ## Pull Requests
 
