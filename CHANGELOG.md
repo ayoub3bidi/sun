@@ -4,7 +4,11 @@ All notable changes to `sun` will be documented in this file.
 
 ## [Unreleased]
 
-## [1.1.0]
+## [1.1.1]
+
+### Fixed
+
+- `run.sh` and `install.sh` fail when piped via `curl | sh`. Scripts now detect the pipe-to-sh case and re-exec from a downloaded copy so `lib/platform.sh` is available.
 
 ### Added
 

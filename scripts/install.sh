@@ -2,6 +2,26 @@
 # Optional persistent install of sun to ~/.local/bin
 set -e
 
+# When piped to sh, $0 is the shell and there is no file to source from.
+# Re-exec from a downloaded copy so lib/platform.sh is available.
+INSTALL_URL="https://raw.githubusercontent.com/ayoub3bidi/sun/main/scripts"
+if [ ! -f "$0" ] || [ ! -r "$0" ]; then
+  _tmpdir=$(mktemp -d)
+  trap 'rm -rf "$_tmpdir"' EXIT INT HUP
+  mkdir -p "${_tmpdir}/lib"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "${INSTALL_URL}/lib/platform.sh" -o "${_tmpdir}/lib/platform.sh"
+    curl -fsSL "${INSTALL_URL}/install.sh" -o "${_tmpdir}/install.sh"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO "${_tmpdir}/lib/platform.sh" "${INSTALL_URL}/lib/platform.sh"
+    wget -qO "${_tmpdir}/install.sh" "${INSTALL_URL}/install.sh"
+  else
+    echo "curl or wget is required" >&2
+    exit 1
+  fi
+  exec sh "${_tmpdir}/install.sh" "$@"
+fi
+
 . "$(dirname "$0")/lib/platform.sh"
 
 SUN_VERSION="${SUN_VERSION:-$(sun_latest_version)}"

@@ -2,6 +2,26 @@
 # Ephemeral sun runner — like npx: cache binary, run create, nothing added to PATH.
 set -e
 
+# When piped to sh, $0 is the shell and there is no file to source from.
+# Re-exec from a downloaded copy so lib/platform.sh is available.
+RUN_URL="https://raw.githubusercontent.com/ayoub3bidi/sun/main/scripts"
+if [ ! -f "$0" ] || [ ! -r "$0" ]; then
+  _tmpdir=$(mktemp -d)
+  trap 'rm -rf "$_tmpdir"' EXIT INT HUP
+  mkdir -p "${_tmpdir}/lib"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "${RUN_URL}/lib/platform.sh" -o "${_tmpdir}/lib/platform.sh"
+    curl -fsSL "${RUN_URL}/run.sh" -o "${_tmpdir}/run.sh"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -qO "${_tmpdir}/lib/platform.sh" "${RUN_URL}/lib/platform.sh"
+    wget -qO "${_tmpdir}/run.sh" "${RUN_URL}/run.sh"
+  else
+    echo "curl or wget is required" >&2
+    exit 1
+  fi
+  exec sh "${_tmpdir}/run.sh" "$@"
+fi
+
 . "$(dirname "$0")/lib/platform.sh"
 
 SUN_VERSION="${SUN_VERSION:-$(sun_latest_version)}"
