@@ -4,6 +4,13 @@ All notable changes to `sun` will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.2]
+
+### Changed
+
+- Updated the Mars and Mercury template pins to releases that include the asynchronous agent runtime, run APIs, and their database migrations.
+- Expanded scaffold integration coverage to exercise Mars, Mercury, and Venus through the same registry path used by `sun create`.
+
 ## [1.1.1]
 
 ### Fixed

@@ -12,6 +12,21 @@ func TestByID(t *testing.T) {
 	}
 }
 
+func TestSolarStackTemplateReleasePins(t *testing.T) {
+	for id, want := range map[string]string{
+		"mars":    "v0.1.5",
+		"mercury": "v0.4.2",
+	} {
+		tmpl, ok := ByID(id)
+		if !ok {
+			t.Fatalf("template %q is missing", id)
+		}
+		if tmpl.DefaultRef != want {
+			t.Errorf("%s ref = %q, want %q", id, tmpl.DefaultRef, want)
+		}
+	}
+}
+
 func TestAPIByMigration(t *testing.T) {
 	alembic, ok := APIByMigration(true)
 	if !ok || alembic.ID != "mars" {

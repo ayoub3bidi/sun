@@ -92,7 +92,7 @@ Requires Go 1.25.12+ and a sibling `../solar-commons` checkout (`replace` in `go
 ┌──────────────────────────────────────────────────────────────────────┐
 │  solar-commons (Go library)                                          │
 │                                                                      │
-│  1. Shallow clone template @ pinned ref (v0.1.3, v1.1.1, …)          │
+│  1. Shallow clone template @ pinned ref (v0.1.5, v1.1.2, …)          │
 │  2. Strip .git history                                               │
 │  3. Parse solar.manifest.yaml                                        │
 │  4. Apply variable rewrites (project name, title, version)           │
@@ -115,8 +115,8 @@ The CLI stays thin. All scaffold logic lives in [`solar-commons`](https://github
 
 | TUI label | Template | Stack | Manifest |
 |---|---|---|---|
-| API + Alembic (recommended) | **Mars** | FastAPI, Alembic, PostgreSQL, Redis, JWT auth | ✅ `v0.1.4` |
-| API + Flyway | **Mercury** | FastAPI, Flyway, PostgreSQL, Redis, JWT auth | ✅ `v0.4.1` |
+| API + Alembic (recommended) | **Mars** | FastAPI, Alembic, PostgreSQL, Redis, JWT auth, optional agent runtime | ✅ `v0.1.5` |
+| API + Flyway | **Mercury** | FastAPI, Flyway, PostgreSQL, Redis, JWT auth, optional agent runtime | ✅ `v0.4.2` |
 | Docs site | **Venus** | Docusaurus 3, Tailwind CSS, i18n, search | ✅ `v1.1.2` |
 
 All three templates are wired in the TUI. Pin bumps happen in `registry/registry.go` when template tags move forward.
@@ -130,7 +130,7 @@ Each template is a standard public GitHub repository. A `solar.manifest.yaml` at
 - **`features`** — optional components (OIDC, i18n, search) with their removal rules when disabled
 - **`default_ref`** — a pinned semver tag for reproducible scaffolds
 
-This means templates evolve independently. A new Mars release only requires bumping `default_ref` — no `sun` release needed.
+This means templates evolve independently. A template pin change in the Sun source requires a Sun release before existing CLI users receive the new default.
 
 ## Commands
 

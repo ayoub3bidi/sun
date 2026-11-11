@@ -29,7 +29,7 @@ go test ./...
 Integration tests (requires network access to clone template repos):
 
 ```bash
-go test -tags integration -timeout 180s ./e2e/...
+go test -tags integration -timeout 300s ./e2e/...
 ```
 
 The integration test scaffolds from the pinned registry refs and may fail due to remote repository or network issues rather than local code problems.
@@ -39,7 +39,7 @@ The integration test scaffolds from the pinned registry refs and may fail due to
 | Workflow | Trigger | What it does |
 |----------|---------|-------------|
 | `ci.yml` | Push/PR to `main` | `go vet` + `go test` |
-| `e2e.yml` | Push/PR to `main` | Unit tests + Mars integration test + solar-commons integration test |
+| `e2e.yml` | Push/PR to `main` | Unit tests + Mars, Mercury, and Venus scaffold integration tests |
 | `release.yml` | Push tag `v*` | Tests + GoReleaser builds Linux/macOS archives + GitHub release |
 
 ## Release process

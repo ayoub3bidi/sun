@@ -23,8 +23,8 @@ jobs:
           go vet ./...
           go test ./...
 
-      - name: Integration tests (Mars)
-        run: go test -tags integration -timeout 180s ./e2e/...
+      - name: Integration tests (all templates)
+        run: go test -tags integration -timeout 300s ./e2e/...
 
       - name: Checkout solar-commons
         uses: actions/checkout@v4
@@ -32,6 +32,6 @@ jobs:
           repository: ayoub3bidi/solar-commons
           path: solar-commons
 
-      - name: solar-commons Mars integration
+      - name: solar-commons template integration
         working-directory: solar-commons
-        run: go test -tags integration -timeout 180s -run TestFullPipelineMars ./...
+        run: go test -tags integration -timeout 300s ./...
