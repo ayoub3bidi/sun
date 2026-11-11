@@ -26,6 +26,11 @@ func validateProjectName(name string) error {
 	return nil
 }
 
+// ValidateProjectName checks the shared project-name contract used by the TUI and CLI.
+func ValidateProjectName(name string) error {
+	return validateProjectName(name)
+}
+
 func destinationExists(name string) bool {
 	dest := filepath.Join(".", name)
 	info, err := os.Stat(dest)
@@ -53,4 +58,9 @@ func deriveTitle(s string) string {
 		}
 	}
 	return strings.Join(words, " ")
+}
+
+// DeriveTitle creates the default display title from a project name.
+func DeriveTitle(s string) string {
+	return deriveTitle(s)
 }

@@ -140,6 +140,7 @@ This means templates evolve independently. A template pin change in the Sun sour
 | `sun version` | Print the current version, commit, and build date |
 | `sun version --check` | Check if a newer version is available |
 | `sun create` | Launch the interactive scaffold TUI |
+| `sun create --template ... --name ...` | Scaffold a project without prompts |
 | `sun update` | Update sun to the latest release |
 
 ### `sun create` flow
@@ -160,6 +161,23 @@ Step 2b — If Docs
     └── Include local search? (default: yes)
     → Output: ./<name>/ (customized Venus clone)
 ```
+
+### Non-interactive scaffolding
+
+Pass a template ID and project name to run `sun create` without starting the TUI. The destination defaults to `./<name>`, titles are derived from the project name, and the API version defaults to `v1`.
+
+```bash
+# Mars (OIDC is off by default)
+sun create --template mars --name my-api --format json
+
+# Mercury with Google OIDC enabled
+sun create --template mercury --name billing-api --title "Billing API" --api-version v2 --with-oidc
+
+# Venus without French i18n or offline search
+sun create --template venus --name product-docs --without-i18n --without-search --format json
+```
+
+Use `--destination` to choose another output directory. Success output is human-readable by default; `--format json` writes a JSON object with the destination, template ID, ref, pruned features, and initial commit. Errors go to stderr and return a non-zero exit status.
 
 ### Updating
 

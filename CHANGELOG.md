@@ -4,6 +4,13 @@ All notable changes to `sun` will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.0]
+
+### Added
+
+- Non-interactive `sun create` flags for scripting and CI, with JSON success output and template feature controls.
+- End-to-end coverage for the direct CLI path across Mars, Mercury, and Venus.
+
 ## [1.1.2]
 
 ### Changed
